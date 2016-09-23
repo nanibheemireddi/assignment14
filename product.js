@@ -65,9 +65,18 @@ app.get('/products/:id', function(req, res){
 app.post('/products', function(req, res){
 
 	var body = req.body;
-	body.id = productNextId++;
-	products.push(body);
-	res.json(body);
+	if((body.hasOwnProperty("Description") && _.isString(body.Description) && body.Description.trim().length > 0)
+		&& (body.hasOwnProperty('productName') && _.isString(body.productName) && body.productName.trim().length > 0)
+		&& (body.hasOwnProperty("productPrice") && !_.isString(body.productPrice))){
+
+		body.id = productNextId++;
+		body.Description = body.Description.trim();
+		body.productName = body.productName.trim();
+		products.push(body);
+		res.json(body);
+	} else  {
+		res.status(400).json("{error: enter correct details}");
+	}
 });
 
 app.delete('/products/:id', function(req, res){
@@ -77,7 +86,7 @@ app.delete('/products/:id', function(req, res){
 		products = _.without(products, matched);
 		res.json(matched);
 	} else {
-		res.status(404).json("{error: match not found }");
+		res.status(404).json("{error: match not found }"); 
 	}
 });
 
@@ -93,7 +102,7 @@ app.put('/products/:id', function(req, res){
 	}
 
 
-	if(body.hasOwnProperty("Description") && !_.isString(body.Description)){
+	if(body.hasOwnProperty("Description") && _.isString(body.Description) &&  body.Description.trim().length > 0){
 		validattributes.Description = body.Description;
 	} else if(body.hasOwnProperty("Description")){
 		return res.status(400).json("{error: Description contains error}");
